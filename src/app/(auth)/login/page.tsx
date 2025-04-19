@@ -1,21 +1,28 @@
-import { getProviders, signIn } from "next-auth/react";
+'use client'
 
-export default async function LoginPage() {
-  const providers = await getProviders();
+import { useEffect, useState } from 'react'
+import { getProviders, signIn } from 'next-auth/react'
+import { ClientSafeProvider } from 'next-auth/react' // Importing type for provider
+
+export default function SignInPage() {
+  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null)
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      const res = await getProviders()
+      setProviders(res)  // Now, this is type-safe
+    }
+
+    fetchProviders()
+  }, [])  // ✅ This ensures it only runs once on mount
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Sign in to Skit</h1>
-      {providers &&
-        Object.values(providers).map((provider) => (
-          <button
-            key={provider.name}
-            onClick={() => signIn(provider.id)}
-            className="bg-gradient-to-r from-gradientStart to-gradientEnd text-white px-4 py-2 rounded-lg"
-          >
-            Sign in with {provider.name}
-          </button>
-        ))}
+    <div>
+      {providers && Object.values(providers).map((provider) => (
+        <button key={provider.name} onClick={() => signIn(provider.id)}>
+          Sign in with {provider.name}
+        </button>
+      ))}
     </div>
-  );
+  )
 }
